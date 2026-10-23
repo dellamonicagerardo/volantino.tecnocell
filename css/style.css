@@ -1086,6 +1086,12 @@ button, a { font-family: inherit; }
 
   .stage { grid-column: 1; }
 
+  /* Horizontal touch turns the page; vertical movement can still scroll. */
+  .stage,
+  .stage * {
+    touch-action: pan-y;
+  }
+
   .nav {
     position: absolute;
     bottom: -2.45rem;

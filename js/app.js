@@ -441,6 +441,80 @@
     sizer.classList.toggle('is-closed', closed);
   };
 
+  // The page-flip swipe only counts a flick under 250ms and ignores touches
+  // that start on a link, so most of a product page never turns. A short
+  // horizontal move anywhere on the sheet turns the page instead.
+  const bindLightSwipe = () => {
+    const stage = book.closest('.stage');
+    const minDistance = 20;
+    let origin = null;
+    let blockClick = false;
+    let swallowMouseUntil = 0;
+
+    const armMouseSwallow = () => {
+      swallowMouseUntil = Date.now() + 700;
+    };
+
+    stage.addEventListener('touchstart', (event) => {
+      if (!flip || event.touches.length !== 1) {
+        origin = null;
+        return;
+      }
+      const touch = event.changedTouches[0];
+      origin = { x: touch.clientX, y: touch.clientY, t: Date.now() };
+      event.stopPropagation();
+    }, { capture: true });
+
+    stage.addEventListener('touchmove', (event) => {
+      if (!origin || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      const dx = touch.clientX - origin.x;
+      const dy = touch.clientY - origin.y;
+      if (Math.abs(dx) < 8 || Math.abs(dx) <= Math.abs(dy)) return;
+      event.preventDefault();
+      event.stopPropagation();
+    }, { capture: true, passive: false });
+
+    stage.addEventListener('touchend', (event) => {
+      const start = origin;
+      origin = null;
+      armMouseSwallow();
+      if (!start || !flip || event.changedTouches.length === 0) return;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - start.x;
+      const dy = touch.clientY - start.y;
+      const turned = Math.abs(dx) >= minDistance
+        && Math.abs(dx) > Math.abs(dy) * 0.75
+        && Date.now() - start.t < 1400
+        && flip.getState() === 'read';
+      if (!turned) return;
+      blockClick = true;
+      window.setTimeout(() => { blockClick = false; }, 500);
+      event.preventDefault();
+      event.stopPropagation();
+      if (dx < 0) flip.flipNext('bottom');
+      else flip.flipPrev('bottom');
+    }, { capture: true, passive: false });
+
+    stage.addEventListener('touchcancel', () => {
+      origin = null;
+      armMouseSwallow();
+    }, { capture: true });
+
+    const swallowSyntheticMouse = (event) => {
+      if (Date.now() > swallowMouseUntil) return;
+      event.stopPropagation();
+    };
+    stage.addEventListener('mousedown', swallowSyntheticMouse, true);
+    stage.addEventListener('mouseup', swallowSyntheticMouse, true);
+    stage.addEventListener('click', (event) => {
+      if (!blockClick) return;
+      blockClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+  };
+
   const showError = (message) => {
     status.hidden = false;
     status.textContent = message;
@@ -503,6 +577,7 @@
 
     prev.addEventListener('click', () => flip.flipPrev('bottom'));
     next.addEventListener('click', () => flip.flipNext('bottom'));
+    bindLightSwipe();
     window.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowRight' || event.key === 'PageDown') {
         event.preventDefault();
