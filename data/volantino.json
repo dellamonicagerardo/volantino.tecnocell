@@ -1,0 +1,147 @@
+{
+  "_istruzioni": [
+    "Modifica questo file per aggiornare il volantino, poi ricarica la pagina.",
+    "I prodotti in \"products\" compaiono in ordine, divisi sulle pagine interne.",
+    "Il primo prodotto con \"featured\": true (o il primo della lista) va in copertina.",
+    "Ogni pagina interna usa un'impaginazione diversa. layouts (facoltativo) ne sceglie l'ordine, a rotazione.",
+    "Impaginazioni: solo (1), duo (2), hero (3), rows (3), quad (4), stack (4), mosaic (5), tiles (6). Il numero è quanti prodotti contiene.",
+    "Campi di un prodotto: name, price, image, brand, category, description, badge, compareAt, featured.",
+    "compareAt è il prezzo pieno barrato. Se è maggiore di price viene mostrata la percentuale di sconto.",
+    "price e compareAt accettano un numero (658.8) oppure un testo italiano (\"1.126,80\").",
+    "image può puntare a un indirizzo web oppure a un file in assets/.",
+    "validFrom e validTo usano il formato AAAA-MM-GG.",
+    "storeOnly e storeOnlyNote: avviso mostrato in copertina e sul retro (le offerte valgono solo in negozio).",
+    "Il file deve restare un JSON valido: niente commenti e niente virgole finali."
+  ],
+  "title": "Volantino Tecnocell",
+  "headline": "Volantino offerte",
+  "kicker": "Sfoglia le promozioni",
+  "storeOnly": "Offerte valide solo in negozio",
+  "storeOnlyNote": "Non acquistabili sul negozio online",
+  "validFrom": "2026-10-23",
+  "validTo": "2026-10-31",
+  "disclaimer": "Prezzi IVA inclusa, validi solo per acquisti nel punto vendita fino a esaurimento scorte. Le offerte non sono disponibili sul negozio online.",
+  "layouts": [
+    "hero",
+    "quad",
+    "mosaic",
+    "rows",
+    "stack",
+    "tiles",
+    "duo"
+  ],
+  "highlights": [
+    "Prezzi IVA inclusa",
+    "Ti aspettiamo a Roccapiemonte",
+    "Info su WhatsApp"
+  ],
+  "store": {
+    "name": "Tecnocell",
+    "address": "Via Filomena Galdieri 35, Roccapiemonte (SA)",
+    "phone": "+39 352 0726974",
+    "phoneHref": "tel:+393520726974",
+    "whatsapp": "393520726974",
+    "hours": "Lunedì – Sabato, 9:00–12:00 e 16:00–20:00",
+    "website": "https://tecnocell.shop",
+    "vat": "05878570653",
+    "mapUrl": "https://maps.google.com/?q=Via+Filomena+Galdieri+35,+Roccapiemonte"
+  },
+  "products": [
+    {
+      "name": "Samsung S26 Ultra 5G",
+      "brand": "Samsung",
+      "category": "Telefonia",
+      "description": "Black · 12+512 GB · 6,9\"",
+      "price": 1126.8,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/6934.jpg?v=1792746229"
+    },
+    {
+      "name": "Samsung S25 5G",
+      "brand": "Samsung",
+      "category": "Telefonia",
+      "description": "Silver · 12+256 GB · 6,2\"",
+      "price": 658.8,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/5970.jpg?v=1792746225"
+    },
+    {
+      "name": "iPhone 17",
+      "brand": "Apple",
+      "category": "Telefonia",
+      "description": "256 GB · Blue · 6,3\"",
+      "price": 930,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/7108.jpg?v=1792746213"
+    },
+    {
+      "name": "iPhone 17 Pro Max",
+      "brand": "Apple",
+      "category": "Telefonia",
+      "description": "512 GB · Orange · 6,9\"",
+      "price": 1546.8,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/6418.jpg?v=1791266367"
+    },
+    {
+      "name": "MacBook Neo 13\"",
+      "brand": "Apple",
+      "category": "Computer",
+      "description": "8+256 GB · Silver",
+      "price": 814.8,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/7018.jpg?v=1792746221"
+    },
+    {
+      "name": "MacBook Air M5 15\"",
+      "brand": "Apple",
+      "category": "Computer",
+      "description": "16+512 GB · Midnight",
+      "price": 1582.8,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/7050.jpg?v=1792746217"
+    },
+    {
+      "name": "AirPods Pro 3",
+      "brand": "Apple",
+      "category": "Audio",
+      "description": "MagSafe · USB-C",
+      "price": 258,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/6823_065cb4c4-49f1-4e1a-94f2-497ca1e06568.jpg?v=1791266836"
+    },
+    {
+      "name": "AirPods 5",
+      "brand": "Apple",
+      "category": "Audio",
+      "description": "Custodia di ricarica wireless",
+      "price": 186,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/7527_7743149d-c6e5-4f60-a406-742a13887bed.jpg?v=1791266833"
+    },
+    {
+      "name": "Clima Akai Mistral",
+      "brand": "Akai",
+      "category": "Clima",
+      "description": "12000 BTU · A++ · Wi-Fi",
+      "price": 270,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/7163.jpg?v=1791267106"
+    },
+    {
+      "name": "Macchina da caffè Kremia",
+      "brand": "Lollo Caffè",
+      "category": "Casa",
+      "description": "White",
+      "price": 90,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/6644.jpg?v=1791267284"
+    },
+    {
+      "name": "Sedia gaming Pro02",
+      "brand": "Game",
+      "category": "Gaming",
+      "description": "Blu",
+      "price": 46.8,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/7166.jpg?v=1791267083"
+    },
+    {
+      "name": "Brondi Amico Super TV",
+      "brand": "Brondi",
+      "category": "Telefonia",
+      "description": "Grigio",
+      "price": 84,
+      "image": "https://cdn.shopify.com/s/files/1/0917/3286/9499/files/6583.jpg?v=1791266153"
+    }
+  ]
+}
