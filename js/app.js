@@ -515,6 +515,142 @@
     }, true);
   };
 
+  // StPageFlip rewrites cssText on every frame, including pages that are
+  // standing still. That reflows the whole sheet and makes the turn stutter.
+  // Keep the same poses, but skip style writes that did not change, and ease
+  // the turn so it does not start and stop at full speed.
+  const easePageTurn = (raw) => (
+    raw < 0.5 ? 2 * raw * raw : 1 - ((-2 * raw + 2) ** 2) / 2
+  );
+
+  const px = (value) => (Math.round(value * 10) / 10).toFixed(1);
+
+  const smoothFlip = (flipbook) => {
+    const sample = flipbook.getPage(0);
+    if (!sample || !sample.element || typeof sample.draw !== 'function') return;
+    const proto = Object.getPrototypeOf(sample);
+
+    proto.simpleDraw = function (side) {
+      const rect = this.render.getRect();
+      const el = this.element;
+      const left = side === 1 ? rect.left + rect.pageWidth : rect.left;
+      el.classList.add('--simple');
+      el.style.position = 'absolute';
+      el.style.display = 'block';
+      el.style.left = `${left}px`;
+      el.style.top = `${rect.top}px`;
+      el.style.width = `${rect.pageWidth}px`;
+      el.style.height = `${rect.height}px`;
+      el.style.zIndex = String(this.render.getSettings().startZIndex + 1);
+      if (el.style.transform) el.style.transform = '';
+      if (el.style.transformOrigin) el.style.transformOrigin = '';
+      if (el.style.clipPath) el.style.clipPath = '';
+      if (el.style.webkitClipPath) el.style.webkitClipPath = '';
+    };
+
+    proto.draw = function (density) {
+      const mode = density || this.nowDrawingDensity;
+      const pos = this.render.convertToGlobal(this.state.position);
+      const rect = this.render.getRect();
+      const el = this.element;
+      el.classList.remove('--simple');
+      el.style.display = 'block';
+      el.style.left = '0px';
+      el.style.top = '0px';
+      el.style.width = `${rect.pageWidth}px`;
+      el.style.height = `${rect.height}px`;
+      if (mode === 'hard') this.drawHard();
+      else this.drawSoft(pos);
+    };
+
+    proto.drawHard = function () {
+      const el = this.element;
+      const rect = this.render.getRect();
+      const angle = this.state.hardDrawingAngle;
+      el.style.clipPath = 'none';
+      el.style.webkitClipPath = 'none';
+      if (this.orientation === 0) {
+        el.style.transformOrigin = `${rect.pageWidth}px 0px`;
+        el.style.transform = `translate3d(0, 0, 0) rotateY(${angle}deg)`;
+      } else {
+        el.style.transformOrigin = '0px 0px';
+        el.style.transform = `translate3d(${rect.left + rect.width / 2}px, 0, 0) rotateY(${angle}deg)`;
+      }
+    };
+
+    proto.drawSoft = function (pos) {
+      const el = this.element;
+      const dir = this.render.getDirection();
+      const angle = this.state.angle;
+      const position = this.state.position;
+      let poly = 'polygon(';
+      let count = 0;
+      for (const point of this.state.area) {
+        if (point == null) continue;
+        const local = dir === 1
+          ? { x: -point.x + position.x, y: point.y - position.y }
+          : { x: point.x - position.x, y: point.y - position.y };
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        poly += `${px(local.x * cos + local.y * sin)}px ${px(local.y * cos - local.x * sin)}px, `;
+        count += 1;
+      }
+      if (!count) return;
+      const clip = `${poly.slice(0, -2)})`;
+      el.style.transformOrigin = '0px 0px';
+      el.style.clipPath = clip;
+      el.style.webkitClipPath = clip;
+      el.style.transform = this.render.isSafari() && angle === 0
+        ? `translate(${px(pos.x)}px, ${px(pos.y)}px)`
+        : `translate3d(${px(pos.x)}px, ${px(pos.y)}px, 0) rotate(${angle}rad)`;
+    };
+
+    const renderer = flipbook.getRender();
+    renderer.clear = function () {
+      const flipping = this.flippingPage;
+      for (const page of this.app.getPageCollection().getPages()) {
+        if (page !== this.leftPage && page !== this.rightPage && page !== flipping && page !== this.bottomPage) {
+          const el = page.getElement();
+          if (el.style.display !== 'none' || el.style.length !== 1) el.style.cssText = 'display: none';
+        }
+        if (page.getTemporaryCopy() !== flipping) page.hideTemporaryCopy();
+      }
+    };
+
+    renderer.render = function (time) {
+      const animation = this.animation;
+      if (animation) {
+        const frames = animation.frames;
+        if (animation.elapsed == null) {
+          animation.elapsed = 0;
+          animation.lastTime = time;
+        }
+        const delta = Math.min(32, Math.max(0, time - animation.lastTime));
+        animation.lastTime = time;
+        animation.elapsed += delta;
+        const raw = animation.elapsed / (animation.duration || 1);
+        if (raw >= 1) {
+          const last = frames.length - 1;
+          if (animation.lastIndex !== last) {
+            animation.lastIndex = last;
+            frames[last]();
+          }
+          if (animation.onAnimateEnd) animation.onAnimateEnd();
+          if (this.animation === animation) this.animation = null;
+        } else {
+          const progress = raw <= 0 ? 0 : easePageTurn(raw);
+          const index = Math.min(frames.length - 1, Math.round(progress * (frames.length - 1)));
+          if (index !== animation.lastIndex) {
+            animation.lastIndex = index;
+            frames[index]();
+          }
+        }
+      }
+      this.timer = time;
+      this.drawFrame();
+    };
+  };
+
   const showError = (message) => {
     status.hidden = false;
     status.textContent = message;
@@ -545,7 +681,7 @@
       minHeight: 400,
       maxHeight: 760,
       drawShadow: true,
-      flippingTime: reduce ? 200 : 750,
+      flippingTime: reduce ? 200 : 1000,
       usePortrait: true,
       startZIndex: 4,
       autoSize: true,
@@ -560,13 +696,14 @@
     });
 
     flip.loadFromHTML(book.querySelectorAll('.page'));
+    smoothFlip(flip);
     flip.on('flip', updateChrome);
     flip.on('changeOrientation', updateChrome);
     flip.on('changeState', (event) => {
       const state = event.data;
-      if ((state === 'flipping' || state === 'user_fold') && flip.getCurrentPageIndex() === 0) {
-        sizer.classList.remove('is-closed');
-      }
+      const turning = state === 'flipping' || state === 'user_fold';
+      sizer.classList.toggle('is-turning', turning);
+      if (turning && flip.getCurrentPageIndex() === 0) sizer.classList.remove('is-closed');
       if (state === 'read') updateChrome();
     });
     status.hidden = true;

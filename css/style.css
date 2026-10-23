@@ -113,10 +113,10 @@ button, a { font-family: inherit; }
 
 .sizer {
   width: min(1040px, 100%);
-  transition: transform 0.7s ease;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.sizer.is-closed { transform: translateX(-25%); }
+.sizer.is-closed { transform: translate3d(-25%, 0, 0); }
 
 #book {
   width: 100%;
@@ -222,6 +222,15 @@ button, a { font-family: inherit; }
   background: #fff;
   color: var(--tc-ink);
   overflow: hidden;
+}
+
+.stf__item {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.sizer.is-turning .stf__item {
+  will-change: transform, clip-path;
 }
 
 .sheet {
@@ -1123,5 +1132,6 @@ button, a { font-family: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sizer,
   .stf__item { transition: none !important; }
 }
